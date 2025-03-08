@@ -114,30 +114,41 @@ export async function searchTracksAsync(
 ): Promise<string | undefined> {
   // split the query into parts, according to the format "artist - title" or "artist - title - album"
   let query = origQuery;
-  const parts = query
-    .split(/[-–]/)
-    .map((p) => p.trim())
-    .filter(Boolean);
-  let queryTrackName = query;
   let album: string | undefined;
-  if (parts.length >= 2) {
-    let filters: string[] = [];
-    // assign the first element to artist, and remove it
-    filters.push(`artist:${parts.shift()!}`);
+  let artist: string | undefined;
+  let normalizeTrackName = query;
+  {
+    const parts = query
+      .split(/[-–]/)
+      .map((p) => p.trim())
+      .filter(Boolean);
     if (parts.length >= 2) {
-      // if there are still 2 or more parts, the last one is the album
-      //filters.push(`album:${parts.pop()!}`);
-      // ignore the album for now
-      album = parts.pop();
+      let filters: string[] = [];
+      // assign the first element to artist, and remove it
+      artist = parts.shift()!;
+      filters.push(`artist:${artist}`);
+      if (parts.length >= 2) {
+        // if there are still 2 or more parts, the last one is the album
+        //filters.push(`album:${parts.pop()!}`);
+        // ignore the album for now
+        album = parts.pop();
+      }
+      // the rest is the title
+      filters.push(`track:${parts.join("-")}`);
+      normalizeTrackName = parts.join(" - ");
+      // rebuild the spotify query with this info
+      query = filters.join(" ");
     }
-    // the rest is the title
-    filters.push(`track:${parts.join("-")}`);
-    queryTrackName = parts.join(" - ");
-    // rebuild the spotify query with this info
-    query = filters.join(" ");
   }
-  const queryAlbumName = (album || "").toLowerCase().replace(/[^a-z0-9]/g, "");
-  queryTrackName = queryTrackName.toLowerCase().replace(/[^a-z0-9]/g, "");
+  const normalizeAlbumName = (album || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "");
+  const normalizeArtistName = (artist || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "");
+  normalizeTrackName = normalizeTrackName
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "");
   let response = await fetch(
     `https://api.spotify.com/v1/search?type=track&limit=20&q=${encodeURIComponent(query)}`,
     {
@@ -154,8 +165,17 @@ export async function searchTracksAsync(
   let tracks = json.tracks.items;
   if (!tracks.length) {
     // retry with the original query
+    const parts = origQuery
+      .split(/[-–]/)
+      .map((p) => p.trim())
+      .filter(Boolean);
+    // remove the album part
+    while (parts.length > 2) {
+      parts.pop();
+    }
+    const query = parts.join(" ");
     response = await fetch(
-      `https://api.spotify.com/v1/search?type=track&limit=20&q=${encodeURIComponent(origQuery)}`,
+      `https://api.spotify.com/v1/search?type=track&limit=20&q=${encodeURIComponent(query)}`,
       {
         headers: {
           Authorization: `Bearer ${bearerToken}`,
@@ -176,15 +196,26 @@ export async function searchTracksAsync(
   const rankedTracks: RankedTrack[] = tracks
     .map((track: any) => {
       const trackName = track.name.toLowerCase().replace(/[^a-z0-9]/g, "");
-      let rank = fuzzySubstringRank(queryTrackName, trackName);
+      let rank = fuzzySubstringRank(normalizeTrackName, trackName);
       if (rank > 3) {
         rank = Infinity;
       } else {
-        if (queryAlbumName) {
+        if (normalizeArtistName) {
+          // check the first artist only
+          const artistName = track.artists[0].name
+            .toLowerCase()
+            .replace(/[^a-z0-9]/g, "");
+          const artistRank = fuzzySubstringRank(
+            normalizeArtistName,
+            artistName
+          );
+          rank += artistRank;
+        }
+        if (normalizeAlbumName) {
           const albumName = track.album.name
             .toLowerCase()
             .replace(/[^a-z0-9]/g, "");
-          const albumRank = fuzzySubstringRank(queryAlbumName, albumName);
+          const albumRank = fuzzySubstringRank(normalizeAlbumName, albumName);
           rank += albumRank;
         }
       }
@@ -197,7 +228,17 @@ export async function searchTracksAsync(
   // sort by rank, ascending
   rankedTracks.sort((a, b) => a.rank - b.rank);
   // return the uri of the top-ranked track
-  return rankedTracks.map((t) => t.track.uri).shift();
+  const track = rankedTracks.shift();
+  if (track) {
+    const artists = track.track.artists.map((a: any) => a.name).join(", ");
+    console.log(
+      `Found ${origQuery} -> ${artists} - ${track.track.name} - ${track.track.album.name}`
+    );
+    return track.track.uri;
+  } else {
+    console.log(`Failed to find ${origQuery}`);
+    return undefined;
+  }
 }
 
 export async function addTracksToPlaylistAsync(

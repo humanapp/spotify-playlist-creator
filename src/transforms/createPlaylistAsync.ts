@@ -5,7 +5,11 @@ import { dismissToast } from "./dismissToast";
 import { ToastWithId } from "../types";
 import * as spotify from "../services/spotify";
 
-export async function createPlaylistAsync(name: string, tracks: string[]) {
+export async function createPlaylistAsync(
+  name: string,
+  tracks: string[],
+  dryRun: boolean
+) {
   const { state } = stateAndDispatch();
   const { bearerToken } = state;
   const toast: ToastWithId = {
@@ -26,6 +30,7 @@ export async function createPlaylistAsync(name: string, tracks: string[]) {
         hideDismissBtn: true,
         timeoutMs: 0,
       };
+
       try {
         showToast(searchingToast);
         const trackUri = await spotify.searchTracksAsync(bearerToken!, track);
@@ -41,8 +46,10 @@ export async function createPlaylistAsync(name: string, tracks: string[]) {
       }
     }
 
-    const playlistId = await spotify.createPlaylistAsync(bearerToken!, name);
-    if (!playlistId) throw 0;
+    const playlistId = dryRun
+      ? ""
+      : await spotify.createPlaylistAsync(bearerToken!, name);
+    if (!dryRun && !playlistId) throw 0;
 
     const addingToast = {
       ...makeToast("info", `Adding tracks...`),
@@ -51,12 +58,14 @@ export async function createPlaylistAsync(name: string, tracks: string[]) {
     };
     try {
       showToast(addingToast);
-      const snapshotId = await spotify.addTracksToPlaylistAsync(
-        bearerToken!,
-        playlistId,
-        trackUris
-      );
-      if (!snapshotId) throw 0;
+      const snapshotId = dryRun
+        ? 0
+        : await spotify.addTracksToPlaylistAsync(
+            bearerToken!,
+            playlistId,
+            trackUris
+          );
+      if (!dryRun && !snapshotId) throw 0;
     } catch (error) {
       showToast(makeToast("error", "Failed to add tracks to playlist"));
     } finally {

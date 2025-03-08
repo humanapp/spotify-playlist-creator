@@ -8,11 +8,14 @@ import {
   Textarea,
   Button,
   Typography,
+  Checkbox,
 } from "@mui/joy";
+import { Check } from "@mui/icons-material";
 
 export function CreatePlaylist() {
   const [playlistTitle, setPlaylistTitle] = useState("");
   const [songList, setSongList] = useState("");
+  const [dryRun, setDryRun] = useState(false);
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
@@ -23,10 +26,12 @@ export function CreatePlaylist() {
     console.log("Playlist Title:", playlistTitle);
     console.log("Songs:", songs);
     if (playlistTitle && songs.length > 0) {
-      await createPlaylistAsync(playlistTitle, songs);
+      await createPlaylistAsync(playlistTitle, songs, dryRun);
     }
-    setPlaylistTitle("");
-    setSongList("");
+    if (!dryRun) {
+      setPlaylistTitle("");
+      setSongList("");
+    }
   };
 
   return (
@@ -70,6 +75,12 @@ export function CreatePlaylist() {
       <Button sx={{ mt: 2 }} onClick={handleSubmit}>
         CREATE PLAYLIST
       </Button>
+      <Checkbox
+        checked={dryRun}
+        checkedIcon={<Check />}
+        label="Dry run. Don't actually create the playlist."
+        onChange={(e) => setDryRun(e.target.checked)}
+      />
     </Sheet>
   );
 }
