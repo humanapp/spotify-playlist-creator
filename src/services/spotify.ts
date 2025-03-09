@@ -92,12 +92,15 @@ export async function createPlaylistAsync(
     body: JSON.stringify({
       name: title,
       public: isPublic,
-      description: "",
+      description: "Created with https://github.com/humanapp/spotify-playlist-creator",
     }),
   });
   if (!response.ok) {
     console.error(response.status, response.statusText, await response.text());
-    signOut();
+    if (response.status === 401) {
+      signOut();
+    }
+    return "";
   }
   const createJson = await response.json();
   return createJson.id;
@@ -159,6 +162,9 @@ export async function searchTracksAsync(
   );
   if (!response.ok) {
     console.error(response.status, response.statusText, await response.text());
+    if (response.status === 401) {
+      signOut();
+    }
     return undefined;
   }
   let json = await response.json();
@@ -188,6 +194,9 @@ export async function searchTracksAsync(
         response.statusText,
         await response.text()
       );
+      if (response.status === 401) {
+        signOut();
+      }  
       return undefined;
     }
     json = await response.json();
@@ -261,6 +270,9 @@ export async function addTracksToPlaylistAsync(
   );
   if (!response.ok) {
     console.error(response.status, response.statusText, await response.text());
+    if (response.status === 401) {
+      signOut();
+    }
     return undefined;
   }
   const json = await response.json();

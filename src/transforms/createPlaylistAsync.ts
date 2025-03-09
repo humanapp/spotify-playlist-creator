@@ -37,7 +37,7 @@ export async function createPlaylistAsync(
         if (trackUri) {
           trackUris.push(trackUri);
         } else {
-          showToast(makeToast("error", `Failed to find ${track}`));
+          showToast(makeToast("error", `Failed to find ${track}`, 10000));
         }
       } catch (error) {
         showToast(makeToast("error", `Failed to search for ${track}`));

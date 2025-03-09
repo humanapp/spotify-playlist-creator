@@ -15,14 +15,14 @@ import { Check } from "@mui/icons-material";
 export function CreatePlaylist() {
   const [playlistTitle, setPlaylistTitle] = useState("");
   const [songList, setSongList] = useState("");
-  const [dryRun, setDryRun] = useState(false);
+  const [dryRun, setDryRun] = useState(true);
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     const songs = songList
       .split("\n")
       .filter((song) => song.trim() !== "")
-      .filter((song) => song.toLowerCase() !== "[mic break]");
+      .filter((song) => !song.toLowerCase().includes("mic break"));
     console.log("Playlist Title:", playlistTitle);
     console.log("Songs:", songs);
     if (playlistTitle && songs.length > 0) {
@@ -31,6 +31,7 @@ export function CreatePlaylist() {
     if (!dryRun) {
       setPlaylistTitle("");
       setSongList("");
+      setDryRun(true);
     }
   };
 
