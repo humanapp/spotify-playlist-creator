@@ -28,3 +28,7 @@ I made this app so I could import playlists of my favorite radio show, Dead Elec
 * If it fails to find your track, search in Spotify itself. Sometimes small differences in spelling can trip it up, for example:
   * Fails to find "Chris and Cosey", but will find "Chris & Cosey"
   * Fails to find "Brian Eno, Mobius, and Roedelius", but will find "Brian Eno, Moebius, Roedelius"
+  * Fails to find "Tangerine Dream – Barbekane – Poland", but will find "Tangerine Dream – Barbakane – Poland"
+  * Remove inline notes like "(single)" and "(excerpt)"
+  * Sometimes excluding the album name can help widen the search
+
