@@ -92,7 +92,8 @@ export async function createPlaylistAsync(
     body: JSON.stringify({
       name: title,
       public: isPublic,
-      description: "Created with https://github.com/humanapp/spotify-playlist-creator",
+      description:
+        "Created with https://github.com/humanapp/spotify-playlist-creator",
     }),
   });
   if (!response.ok) {
@@ -196,7 +197,7 @@ export async function searchTracksAsync(
       );
       if (response.status === 401) {
         signOut();
-      }  
+      }
       return undefined;
     }
     json = await response.json();
@@ -241,11 +242,12 @@ export async function searchTracksAsync(
   if (track) {
     const artists = track.track.artists.map((a: any) => a.name).join(", ");
     console.log(
-      `Found ${origQuery} -> ${artists} - ${track.track.name} - ${track.track.album.name}`
+      `Found: ${origQuery} : %c${artists} - ${track.track.name} - ${track.track.album.name}`,
+      "color: blue"
     );
     return track.track.uri;
   } else {
-    console.log(`Failed to find ${origQuery}`);
+    console.log(`%cFailed to find: ${origQuery}`, "color: red");
     return undefined;
   }
 }
