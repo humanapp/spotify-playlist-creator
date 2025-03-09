@@ -4,3 +4,23 @@ Paste a bunch of songs and it will make you a playlist! Ideally, each line would
 
 I made this app so I could import playlists of my favorite radio show, Dead Electric on KSER, hosted by David Haldeman. Playlists of every show can be found here: https://deadelectricfm.com/playlists/
 
+## HOW TO RUN
+
+0. Ensure you have GIT and NodeJS installed on your local machine.
+1. Go to Spotify Developer Portal and create an app.
+  - For callback URL, use `http://localhost:5173/auth/callback`
+  - Make note of the app's client id and client secret.
+2. Sync this repo to your local machine.
+3. Run `npm i` to install dependencies.
+4. Create a file at the root of this project called `.env`.
+5. In `.env`, add the following:
+  ```
+  VITE_SPOTIFY_CLIENT_ID=<your app's client id>
+  VITE_SPOTIFY_CLIENT_SECRET=<your app's client secret>
+  ```
+6. Run the app: `npm run dev`
+7. Open a web browser to http://localhost:5173
+
+## TIPS AND TRICKS
+
+* Before actually creating a playlist, do a dry run with the browser's dev console open. In the console you'll see the found songs it thinks most closely matched your inputs. Verify them and tweak the text until you're happy with the results.
