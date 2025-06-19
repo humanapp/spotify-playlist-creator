@@ -50,7 +50,7 @@ export function signIn() {
       client_id: import.meta.env.VITE_SPOTIFY_CLIENT_ID,
       show_dialog: "true",
       scope: scope,
-      redirect_uri: "http://localhost:5173/auth/callback",
+      redirect_uri: "https://spotify-playlist-creator-bf9v.onrender.com/auth/callback",
       state: "1234",
     });
 }
