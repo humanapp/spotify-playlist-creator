@@ -20,7 +20,7 @@ export async function authCallbackAsync() {
       body: querystring.stringify({
         grant_type: "authorization_code",
         code: code,
-        redirect_uri: "http://localhost:5173/auth/callback",
+        redirect_uri: "https://spotify-playlist-creator-bf9v.onrender.com/auth/callback",
       }),
     });
 
