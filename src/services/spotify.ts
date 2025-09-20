@@ -20,7 +20,7 @@ export async function authCallbackAsync() {
       body: querystring.stringify({
         grant_type: "authorization_code",
         code: code,
-        redirect_uri: "https://spotify-playlist-creator-bf9v.onrender.com/auth/callback",
+        redirect_uri: `${import.meta.env.VITE_SPOTIFY_AUTH_CALLBACK}`,
       }),
     });
 
@@ -50,7 +50,7 @@ export function signIn() {
       client_id: import.meta.env.VITE_SPOTIFY_CLIENT_ID,
       show_dialog: "true",
       scope: scope,
-      redirect_uri: "https://spotify-playlist-creator-bf9v.onrender.com/auth/callback",
+      redirect_uri: `${import.meta.env.VITE_SPOTIFY_AUTH_CALLBACK}`,
       state: "1234",
     });
 }
